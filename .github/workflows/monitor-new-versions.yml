@@ -1,0 +1,62 @@
+name: Monitor helm repository for new versions
+
+on:
+  schedule:
+  - cron: "0 2 * * *"
+  workflow_dispatch:
+
+jobs:
+  get-stable-version:
+    runs-on: ubuntu-latest
+    outputs:
+      diff: ${{ steps.check-diff.outcome }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2.4.2
+    - name: Get latest stable version of helm
+      # run: curl -sw %{redirect_url} https://github.com/helm/helm/releases/latest | grep -oP "(?<=tag/).*" > version.txt
+      run: echo "v3.9.3" > version.txt
+    - name: Check for differences in git repo (aka a new version of helm)
+      id: check-diff
+      run: git diff --quiet
+      continue-on-error: true
+    - name: Echo diff
+      run: echo "${{ steps.check-diff.outcome }}"
+    - name: Upload version.txt
+      uses: actions/upload-artifact@v3
+      if: ${{ steps.check-diff.outcome == 'failure' }}
+      with:
+        name: version
+        path: version.txt
+  
+  commit-new-version:
+    needs: [get-stable-version]
+    if: ${{ needs.get-stable-version.outputs.diff == 'failure' }}
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2.4.2
+      with:
+        token: ${{ secrets.PUSH_TOKEN }}
+    - name: Download version.txt
+      uses: actions/download-artifact@v3
+      with:
+        name: version
+    - name: Get version number
+      run: echo "VERSION_NUMBER=$(cat version.txt)" >> $GITHUB_ENV
+    - name: Set git credentials
+      run: |
+        git config user.email "${{ github.actor }}@github.com"
+        git config user.name "${{ github.actor }}"
+    - name: Git add version.txt
+      run: git add version.txt
+    - name: Git commit
+      run: git commit -m "Release new version ${{ env.VERSION_NUMBER }}"
+    - name: Tag commit
+      run: git tag ${{ env.VERSION_NUMBER }}
+    - name: Push
+      run: |
+        git push
+        git push origin ${{ env.VERSION_NUMBER }}
