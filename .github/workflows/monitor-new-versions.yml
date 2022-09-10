@@ -15,8 +15,8 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2.4.2
     - name: Get latest stable version of helm
-      # run: curl -sw %{redirect_url} https://github.com/helm/helm/releases/latest | grep -oP "(?<=tag/).*" > version.txt
-      run: echo "v3.9.3" > version.txt
+      run: curl -sw %{redirect_url} https://github.com/helm/helm/releases/latest | grep -oP "(?<=tag/).*" > version.txt
+      # run: echo "v3.9.3" > version.txt
     - name: Check for differences in git repo (aka a new version of helm)
       id: check-diff
       run: git diff --quiet
