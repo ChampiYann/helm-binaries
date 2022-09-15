@@ -15,9 +15,9 @@ jobs:
     - name: Get version to download and release
       run: echo "VERSION_NUMBER=$(cat version.txt)" >> $GITHUB_ENV
     - name: Download linux versions of helm
-      run: curl -L -o "helm_linux_#1" "https://get.helm.sh/helm-${{ env.VERSION_NUMBER }}-linux-{arm,arm64,amd64,386,ppc64le,s390x}.tar.gz"
+      run: curl -L -o "helm_linux_#1.tar.gz" "https://get.helm.sh/helm-${{ env.VERSION_NUMBER }}-linux-{arm,arm64,amd64,386,ppc64le,s390x}.tar.gz"
     - name: Download macOS versions of helm
-      run: curl -L -o "helm_darwin_#1" "https://get.helm.sh/helm-${{ env.VERSION_NUMBER }}-darwin-{arm64,amd64}.tar.gz"
+      run: curl -L -o "helm_darwin_#1.tar.gz" "https://get.helm.sh/helm-${{ env.VERSION_NUMBER }}-darwin-{arm64,amd64}.tar.gz"
     - name: Automatic Releases
       # You may pin to the exact commit or the version.
       # uses: marvinpinto/action-automatic-releases@919008cf3f741b179569b7a6fb4d8860689ab7f0
